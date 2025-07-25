@@ -52,7 +52,7 @@ body {
 
 .chat-input-bar {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   background: white;
   border: 1px solid #d1d5db;
   border-radius: 16px;
@@ -342,6 +342,7 @@ body {
 
 /* Responsive chat input bar */
 .chat-input-actions {
+  align-self: flex-end;
   display: flex;
   gap: 8px;
 }
@@ -382,5 +383,20 @@ body {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+  }
+} 
+
+.chat-inner {
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  padding-left: 32px;
+  padding-right: 32px;
+}
+
+@media (max-width: 900px) {
+  .chat-inner {
+    padding-left: 8px;
+    padding-right: 8px;
   }
 } 
