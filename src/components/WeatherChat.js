@@ -102,22 +102,8 @@ export default function WeatherChat() {
 
   return (
     <div className="chat-container">
-      {/* Header */}
-      <div className="chat-header">
-        <h1 className="text-xl font-semibold text-gray-800">Weather Chat</h1>
-        <p className="text-sm text-gray-600">Ask me anything about the weather!</p>
-      </div>
-
-      {/* Messages Area */}
+      {/* Removed chat header */}
       <div className="chat-messages">
-        {messages.length === 0 && (
-          <div className="welcome-container">
-            <div className="welcome-emoji">🌤️</div>
-            <p className="welcome-title">Welcome to Weather Chat!</p>
-            <p className="welcome-subtitle">Ask me about current weather, forecasts, or any weather-related questions.</p>
-          </div>
-        )}
-        
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
