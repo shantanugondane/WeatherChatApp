@@ -124,11 +124,11 @@ export default function WeatherChat() {
 
   return (
     <div className="chat-container">
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 32 }}>
+      <div className="chat-header">
         <select
           value={activeThreadId}
           onChange={e => setActiveThreadId(Number(e.target.value))}
-          style={{ padding: '8px', borderRadius: 8, border: '1px solid #d1d5db', fontWeight: 500 }}
+          className="chat-selector"
         >
           {threads.map(thread => (
             <option key={thread.id} value={thread.id}>{thread.name}</option>
@@ -136,7 +136,7 @@ export default function WeatherChat() {
         </select>
         <button
           onClick={handleNewThread}
-          style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fafafa', color: '#222', cursor: 'pointer', fontWeight: 500 }}
+          className="new-chat-btn"
         >
           + New Chat
         </button>
