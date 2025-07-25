@@ -5,9 +5,14 @@ import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
 
 export default function WeatherChat() {
-  const [messages, setMessages] = useState([]);
+  const [threads, setThreads] = useState([
+    { id: 1, name: 'Chat 1', messages: [] }
+  ]);
+  const [activeThreadId, setActiveThreadId] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
+
+  const activeThread = threads.find(t => t.id === activeThreadId);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -15,34 +20,29 @@ export default function WeatherChat() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages]);
+  }, [activeThread?.messages]);
 
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
-
     const userMessage = {
       id: Date.now(),
       role: 'user',
       content: message,
       timestamp: new Date().toISOString(),
     };
-
-    setMessages(prev => [...prev, userMessage]);
+    setThreads(prev => prev.map(thread =>
+      thread.id === activeThreadId
+        ? { ...thread, messages: [...thread.messages, userMessage] }
+        : thread
+    ));
     setIsLoading(true);
-
     try {
       const response = await fetch('/api/weather', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message }),
       });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let assistantMessage = {
@@ -51,37 +51,38 @@ export default function WeatherChat() {
         content: '',
         timestamp: new Date().toISOString(),
       };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
+      setThreads(prev => prev.map(thread =>
+        thread.id === activeThreadId
+          ? { ...thread, messages: [...thread.messages, assistantMessage] }
+          : thread
+      ));
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value);
         const lines = chunk.split('\n');
-
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             const data = line.slice(6);
-            if (data === '[DONE]') {
-              break;
-            }
+            if (data === '[DONE]') break;
             try {
               const parsed = JSON.parse(data);
               if (parsed.choices && parsed.choices[0]?.delta?.content) {
                 assistantMessage.content += parsed.choices[0].delta.content;
-                setMessages(prev => 
-                  prev.map(msg => 
-                    msg.id === assistantMessage.id 
-                      ? { ...msg, content: assistantMessage.content }
-                      : msg
-                  )
-                );
+                setThreads(prev => prev.map(thread =>
+                  thread.id === activeThreadId
+                    ? {
+                        ...thread,
+                        messages: thread.messages.map(msg =>
+                          msg.id === assistantMessage.id
+                            ? { ...msg, content: assistantMessage.content }
+                            : msg
+                        )
+                      }
+                    : thread
+                ));
               }
-            } catch (e) {
-              // Skip invalid JSON
-            }
+            } catch (e) { /* skip invalid JSON */ }
           }
         }
       }
@@ -94,20 +95,56 @@ export default function WeatherChat() {
         timestamp: new Date().toISOString(),
         isError: true,
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setThreads(prev => prev.map(thread =>
+        thread.id === activeThreadId
+          ? { ...thread, messages: [...thread.messages, errorMessage] }
+          : thread
+      ));
     } finally {
       setIsLoading(false);
     }
   };
 
+  const handleClearChat = () => {
+    setThreads(prev => prev.map(thread =>
+      thread.id === activeThreadId
+        ? { ...thread, messages: [] }
+        : thread
+    ));
+  };
+
+  const handleNewThread = () => {
+    const newId = threads.length ? Math.max(...threads.map(t => t.id)) + 1 : 1;
+    setThreads(prev => [
+      ...prev,
+      { id: newId, name: `Chat ${newId}`, messages: [] }
+    ]);
+    setActiveThreadId(newId);
+  };
+
   return (
     <div className="chat-container">
-      {/* Removed chat header */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16, marginTop: 32 }}>
+        <select
+          value={activeThreadId}
+          onChange={e => setActiveThreadId(Number(e.target.value))}
+          style={{ padding: '8px', borderRadius: 8, border: '1px solid #d1d5db', fontWeight: 500 }}
+        >
+          {threads.map(thread => (
+            <option key={thread.id} value={thread.id}>{thread.name}</option>
+          ))}
+        </select>
+        <button
+          onClick={handleNewThread}
+          style={{ padding: '8px 16px', borderRadius: 8, border: '1px solid #d1d5db', background: '#fafafa', color: '#222', cursor: 'pointer', fontWeight: 500 }}
+        >
+          + New Chat
+        </button>
+      </div>
       <div className="chat-messages">
-        {messages.map((message) => (
+        {activeThread?.messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
-        
         {isLoading && (
           <div className="loading-container">
             <div className="loading-avatar">
@@ -120,13 +157,10 @@ export default function WeatherChat() {
             </div>
           </div>
         )}
-        
         <div ref={messagesEndRef} />
       </div>
-
-      {/* Input Area */}
       <div className="chat-input-container">
-        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} onClearChat={handleClearChat} />
       </div>
     </div>
   );
