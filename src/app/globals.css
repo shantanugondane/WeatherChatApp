@@ -352,8 +352,11 @@ body {
 /* Responsive design */
 @media (max-width: 640px) {
   .chat-input-bar {
-    margin: 0 0.5rem;
-    border-radius: 8px;
+    width: 100%;
+    margin: 0;
+    border-radius: 12px;
+    padding: 8px;
+    height: auto;
   }
   
   .message-bubble {
@@ -363,6 +366,18 @@ body {
   .welcome-container {
     padding: 1rem;
   }
+
+  .chat-header {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 0 8px;
+  }
+
+  .chat-selector,
+  .new-chat-btn {
+    font-size: 16px;
+    padding: 8px 16px;
+  }
 } 
 
 @media (max-width: 700px) {
@@ -370,14 +385,23 @@ body {
     padding-left: 8px;
     padding-right: 8px;
   }
+
+  .chat-messages {
+    padding: 1.5rem 8px 1rem 8px;
+  }
 } 
 
 @media (max-width: 740px) {
   .chat-input-bar {
     width: 100%;
-    padding: 10px;
+    padding: 8px;
     height: auto;
-    margin-top: 24px;
+    margin-top: 16px;
+    margin-bottom: 16px;
+  }
+
+  .chat-input-container {
+    margin-bottom: 16px;
   }
 } 
 
@@ -407,13 +431,17 @@ body {
     align-items: stretch;
     gap: 8px;
   }
+  
   .chat-input-actions {
     display: flex;
     flex-direction: row;
     gap: 8px;
     width: 100%;
+    justify-content: space-between;
   }
-  .clear-chat-btn, .chat-send-button {
+  
+  .clear-chat-btn, 
+  .chat-send-button {
     flex: 1 1 0;
     width: auto;
     min-width: 0;
@@ -425,18 +453,22 @@ body {
 
 /* Responsive dropdown and new chat button row */
 @media (max-width: 600px) {
-  .chat-container > div:first-child {
-    flex-direction: column !important;
-    gap: 8px !important;
-    margin-bottom: 12px !important;
-    margin-top: 16px !important;
-    align-items: stretch !important;
+  .chat-header {
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    margin-top: 16px;
+    align-items: stretch;
+    margin-left: 0;
+    margin-right: 0;
   }
-  .chat-container select,
-  .chat-container button {
+  
+  .chat-selector,
+  .new-chat-btn {
     width: 100%;
     min-width: 0;
     box-sizing: border-box;
+    font-size: 16px;
   }
 } 
 
